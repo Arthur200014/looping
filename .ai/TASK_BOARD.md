@@ -39,8 +39,8 @@
 |---|---|---|
 | A — метаданные/доступ/структура | DONE | Созданы проектные каталоги и документы; полный аудит гигантских `gaid.html` в backlog |
 | B1 — RoomState / reducer / in-memory navigation | DONE | 13/13 Node in-process tests PASS, 100 switches with stable subscriber count; network/browser NOT_VERIFIED |
-| B2 — единый UI/MathJax/проверка вводов | IN_PROGRESS | B2.1 PASS; B2.2 HTTP static delivery PASS, browser ESM / CDN 3.2.2 blocked and NOT_VERIFIED |
-| B3 — общая векторная доска | NOT_STARTED | Компактная панель + Ctrl+Z + стирание штрихов |
+| B2 — единый UI/MathJax/проверка вводов | DONE | B2.1 tests PASS; B2.2 GitHub runner real HTTP ESM + CDN MathJax 3.2.2 PASS (run 39767483788), not remote two-client sync |
+| B3 — общая векторная доска | NOT_STARTED | NEXT B3.1: typed stroke model, real intersection eraser, undo and epoch; UI toolbar later |
 | B4 — test-only realtime server + auth | NOT_STARTED | Реальные независимые браузеры |
 | C — пилот №13 | NOT_STARTED | Не начинать массовую генерацию |
 | D — независимая проверка №13 | NOT_STARTED | Без неё этап E запрещён |
@@ -53,9 +53,17 @@
 | Slice | Status | Actual evidence |
 |---|---|---|
 | B2.1 — common station shell, controlled fields, MathJax adapter, mount/cleanup | DONE | Local npm test 16/16; Chromium DOM smoke PASS; 8 new files byte-matched Git staged blobs |
-| B2.2 — actual served ESM + MathJax rendering verification | BLOCKED (retested 2026-10-22) | npm test 16/16 PASS, 6 HTTP assets 200; Chromium goto ERR_BLOCKED_BY_ADMINISTRATOR (exit 2), jsDelivr DNS gaierror -3. ESM/MathJax 3.2.2/browser UX NOT_VERIFIED |
+| B2.2 — actual served ESM + MathJax rendering verification | VERIFIED | GitHub Actions run 39767483788 SUCCESS; 16/16 Node PASS, 6 HTTP assets 200, real MathJax.version=3.2.2 + vertical mjx-mfrac, 0/focus/cleanup/console/375px PASS |
 
 Task kits OGA/1–25 remain NOT_STARTED, no bulk content generated.
 
 
 B2.2 repeated run: 2026-10-22 10:04 UTC; **no transition to DONE**. Next: repeat full HTTP-browser CDN test in a legitimately permitted environment. No OGA tasks promoted.
+
+## B2.3 CI verification — verified 2026-10-22
+| Slice | Status | Evidence |
+|---|---|---|
+| B2.3 — reproducible GitHub Actions browser workflow | VERIFIED | `.github/workflows/b22-browser.yml`, push run [39767483788](https://github.com/Arthur200014/looping/actions/runs/39767483788), conclusion success, artifacts ID 12420837640, PASS verdict; fallback 3.2.1 excluded |
+| B3.1 — vector stroke model/reducer | NOT_STARTED | **One next action**; geometry and deterministic tests |
+
+The historical local B2.2 run at 10:04 UTC was BLOCKED. The **later GitHub Actions successful result** verified actual browser ESM/CDN, not a retroactive local PASS. OGA/1–25 remain NOT_STARTED.

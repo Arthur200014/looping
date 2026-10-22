@@ -138,3 +138,26 @@ npm test && python tests/browser_http_mathjax.py
 **B2.2 STATUS: BLOCKED (NOT_VERIFIED)** for real browser HTTP ES module evaluation, MathJax **3.2.2** `typesetPromise` and vertical `mjx-mfrac`, navigation 0, focus, cleanup, runtime console and 375px layout within the HTTP-loaded fixture. Prior local MathJax **3.2.1** smoke was not used as evidence for 3.2.2 and was not re-run in this turn. All `OGA/1–25`, `testing-hosting`, and production sources unchanged.
 
 **One next action:** rerun the full command on a permitted Chromium+localhost HTTP+CDN network environment and capture real on-page assertions, keeping B2.2 blocked until then.
+
+
+## B2.3 GitHub Actions actual run; B2.2 E2E verified — 2026-10-22 11:02 UTC
+
+**Repo:** `Arthur200014/looping`, `main`. **Workflow:** `.github/workflows/b22-browser.yml`; triggered by push of `da98f222f35e152d932d66fa332ed0453ec2593f`. **Run ID 39767483788**, attempt 1, job ID `119786424088`; GitHub API returned `status=completed`, `conclusion=success`. [Run details and job log](https://github.com/Arthur200014/looping/actions/runs/39767483788).
+
+**Runner:** `ubuntu-24.04`, configured Node 22, Python 3.11, `playwright==1.56.0`, Chromium installed with `python -m playwright install --with-deps chromium`. Browser test sets `B2_USE_PLAYWRIGHT_CHROMIUM=1` and `B2_ARTIFACT_DIR=artifacts/browser` to use the installed Playwright browser and preserve artifacts.
+
+| Actual GitHub Actions step / command | Step conclusion | Exact observed evidence in job log |
+|---|---|---|
+| `npm install --no-audit --no-fund` | success | TypeScript installed, no package-lock precondition |
+| `python -m pip install 'playwright==1.56.0'` and `python -m playwright install --with-deps chromium` | success | Chromium installed on runner |
+| `npm test` | **success** | `tsc --noEmit` PASS; `tsc` PASS; TAP `1..16`, `# tests 16`, `# pass 16`, `# fail 0` |
+| `python tests/browser_http_mathjax.py --assets-only` | **success** | `PASS HTTP GET: 6 static assets, 200, correct MIME, nonempty` |
+| `python tests/browser_http_mathjax.py` | **success** | True Chromium `page.goto` of `http://127.0.0.1:36929/tests/fixtures/station-http.html` and actual module HTTP GETs; `PASS MathJax: real CDN request, typesetPromise, vertically stacked fraction`; test source enforces `MathJax.version === '3.2.2'`, CDN HTTP 200 and numerator y < denominator y in `mjx-mfrac` |
+| Teacher navigation, input focus, reset, dispose | **success** | `PASS navigation/focus/reset/cleanup via HTTP ESM` |
+| Emulated 375px responsive layout and browser errors | **success** | `PASS viewport 375px (emulated), browser pageerror and console error lists empty`, `Browser pageerrors: []; console errors: []; request failures: []` |
+| Outcome classifier | **success** | `VERDICT=PASS`; any blocked/assertion failure would leave browser step failing |
+| `actions/upload-artifact@v4` | **success** | Artifact `b22-evidence-39767483788-1`, ID `12420837640`, `420036` bytes, retained 14 days; logs, screenshot, browser trace and request diagnostics |
+
+**Important scope:** the GitHub runner *really* accessed localhost HTTP and jsDelivr and verified **exact MathJax 3.2.2**, not the local MathJax 3.2.1 fallback. Historical runs in this conversation's restricted local environment returned `ERR_BLOCKED_BY_ADMINISTRATOR`/DNS errors; those remain recorded above, but **B2.2 is now VERIFIED** in the GitHub runner. This is not an actual independent two-device network sync: fixture mounts two participant shells on a **single in-process hub**. 375px is emulated Chromium, not physical mobile; educational OGA content remains NOT_VERIFIED.
+
+**Commit of this .ai update:** the resulting SHA is verifiable in the repository's `main` ref (never infer a not-yet-created commit hash). **Next one action:** B3.1 typed shared vector stroke model/reducer with eraser intersection, own-stroke undo, epoch and deterministic tests.

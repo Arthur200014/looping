@@ -1,31 +1,20 @@
-# CURRENT TASK
+# CURRENT TASK — B3.1 common vector board core
 
-**Stage**: B2.2 — verification of real HTTP ESM + MathJax 3.2.2 in a browser.
-**Status**: BLOCKED_BY_ENVIRONMENT (HTTP fixture implemented; B2.2 browser+MathJax 3.2.2 E2E NOT_VERIFIED after a second real attempt).  
-**Updated**: 2026-10-22.
+**Stage:** B3.1 — reusable vector stroke model and reducer.
+**Status:** NOT_STARTED (B2.2 and B2.3 verified).
+**Updated:** 2026-10-22.
 
-## Delivered
-- Browser entrypoint: `tests/fixtures/station-http.html` and `station-http.mjs`. Imports compiled ESM and the real `loadMathJax(document)` (pinned CDN version 3.2.2); no fake math renderer.
-- `tests/serve_fixture.py` and `tests/browser_http_mathjax.py` with real asset-response assertions and fail-closed browser assertions; auxiliary local `tests/browser_mathjax_offline.py`.
-- 16/16 Node tests incl B1 regressions, HTTP GET for 6 files, prior Chromium DOM smoke all PASS. Local installed MathJax 3.2.1 typesetPromise/stacked fraction PASS (NOT version 3.2.2).
+## Verified prerequisite
+GitHub Actions **39767483788** on commit `da98f222f35e152d932d66fa332ed0453ec2593f`: **COMPLETED / SUCCESS**, full B2.2 browser real-HTTP ESM and CDN MathJax 3.2.2 verification. `npm test` **16/16 PASS**, six HTTP assets 200; real `typesetPromise` and vertically stacked `mjx-mfrac`; navigation chapter 0, focus, cleanup, clean browser logs, width 375px emulated viewport. Artifact `b22-evidence-39767483788-1` (ID `12420837640`). Link https://github.com/Arthur200014/looping/actions/runs/39767483788. Historical local browser/DNS blocks are retained in `.ai/TEST_RESULTS.md` and do not negate verified GitHub runner results.
 
-## Blocking observations
-Chromium `page.goto(http://127.0.0.1:<port>/tests/fixtures/station-http.html)` -> `net::ERR_BLOCKED_BY_ADMINISTRATOR` (test exit 2), despite Python clients fetching same server. CDN lookup for `cdn.jsdelivr.net` -> `[Errno -3] Temporary failure in name resolution`. Thus cannot truthfully assert a successful full browser ESM import, CDN-loaded MathJax **3.2.2**, console after navigation, focus/reset/cleanup via HTTP, or mobile responsive behavior in loaded fixture. Full detailed commands and output in `.ai/TEST_RESULTS.md`.
+## B3.1 narrow implementation scope
+1. Read `.ai/HANDOFF.md`, this document, `docs/ARCHITECTURE.md`, and minimal shared B1 code. Confirm current GitHub HEAD.
+2. Implement **typed data-only vector board state + deterministic pure reducer** under `shared/board/`, using normalized points and stable `strokeId`. Avoid painting-on-top erasers.
+3. Hit-test eraser trajectories against actual stroke segments and remove intersecting strokes; support `undo` for the actor's own most recent existing stroke.
+4. Define board reset/epoch semantics so stale operations cannot resurrect removed strokes, and make ordering/integration boundaries explicit.
+5. Add real deterministic geometry tests: eraser intersects/non-intersects, delete only matching stroke, undo own vs others, duplicate event, stale epoch, reset/replay. Preserve all existing 16 B1/B2 tests.
+6. Run `npm test` with exact log and update all four .ai status files. Do not claim network/browser board sync until implemented/tested. Commit only `looping/main` without force.
 
-## Single next action
-**In a browser environment with localhost HTTP navigation and public CDN DNS allowed**, run `npm test && python tests/browser_http_mathjax.py`, record the actual result and resolve any defects. Until that succeeds B2.2 remains **PARTIAL/BLOCKED**, not DONE; after it succeeds B3 is the common vector board.
+**Single NEXT_ACTION:** build + test the reusable B3.1 vector stroke model/reducer.
 
-## Guardrails
-Do not re-audit A, change `testing-hosting`, access production infrastructure, or create `OGA/1–25` content. Read `.ai/HANDOFF.md` and this task first.
-
-## New verification checkpoint — 2026-10-22 10:04 UTC
-- Re-ran **exact command** `npm test && python tests/browser_http_mathjax.py` from `/mnt/data/looping-b22`.
-- PASS: typecheck/build/Node `16/16`; 6 HTTP resources served 200 with correct content types.
-- BLOCKED (combined exit 2): Chromium `Page.goto: net::ERR_BLOCKED_BY_ADMINISTRATOR at http://127.0.0.1:37297/tests/fixtures/station-http.html`.
-- `python tests/browser_http_mathjax.py --assets-only`: PASS exit 0, six HTTP GETs (port 36139).
-- CDN DNS: `socket.getaddrinfo('cdn.jsdelivr.net',443)` -> `gaierror: [Errno -3] Temporary failure in name resolution`.
-- Browser's actual HTTP ESM execution, MathJax **3.2.2** `typesetPromise/mjx-mfrac`, navigation/focus/cleanup/console/375px: **NOT_VERIFIED**. Empty pageerror/console lists arise before page load, not evidence of success.
-- No alternate permitted browser tool available. No code, fixture, production, `testing-hosting` or `OGA/1–25` changes.
-- Exact evidence: `.ai/TEST_RESULTS.md` (B2.2 repeated run).
-
-**NEXT_ACTION (one):** Run `npm test && python tests/browser_http_mathjax.py` in a browser runtime that permits localhost HTTP and CDN DNS/HTTPS; close B2.2 only after a genuine full PASS.
+**Non-goals:** OGA/1–25 education pages, Firebase/GAS/DB and production systems, independent browser network transport, UI toolbar/Canvas rendering in the same B3.1 slice.
