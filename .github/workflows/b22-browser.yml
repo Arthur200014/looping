@@ -1,0 +1,116 @@
+name: B2.2 Browser MathJax 3.2.2
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/b22-browser.yml'
+      - 'shared/**'
+      - 'tests/**'
+      - 'package.json'
+      - 'tsconfig.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: b22-browser-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  browser-b22:
+    name: Node + real HTTP ESM + CDN MathJax 3.2.2
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      B2_USE_PLAYWRIGHT_CHROMIUM: '1'
+      B2_ARTIFACT_DIR: artifacts/browser
+      PYTHONUNBUFFERED: '1'
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout looping
+        uses: actions/checkout@v4
+
+      - name: Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Capture runner versions
+        run: |
+          mkdir -p artifacts/browser
+          { echo "sha=${GITHUB_SHA}"; node --version; npm --version; python --version; } | tee artifacts/versions.log
+
+      - name: Install pinned TypeScript
+        run: npm install --no-audit --no-fund
+
+      - name: Install Playwright and Chromium
+        run: |
+          python -m pip install 'playwright==1.56.0'
+          python -m playwright install --with-deps chromium
+
+      - name: Typecheck, build and regression tests
+        id: node
+        run: |
+          set -o pipefail
+          npm test 2>&1 | tee artifacts/npm-test.log
+
+      - name: Real local HTTP asset and MIME check
+        id: http
+        run: |
+          set -o pipefail
+          python tests/browser_http_mathjax.py --assets-only 2>&1 | tee artifacts/http-assets.log
+
+      - name: Real HTTP ESM, MathJax 3.2.2 and browser assertions
+        id: browser
+        run: |
+          set -o pipefail
+          python tests/browser_http_mathjax.py 2>&1 | tee artifacts/browser-e2e.log
+
+      - name: Classify results without turning blocked into pass
+        if: ${{ always() }}
+        env:
+          NODE_RESULT: ${{ steps.node.outcome }}
+          HTTP_RESULT: ${{ steps.http.outcome }}
+          BROWSER_RESULT: ${{ steps.browser.outcome }}
+        run: |
+          if [[ "$BROWSER_RESULT" == "success" && "$NODE_RESULT" == "success" && "$HTTP_RESULT" == "success" ]]; then
+            verdict=PASS
+          elif [[ -f artifacts/browser-e2e.log ]] && grep -Eqi 'ERR_BLOCKED_BY_ADMINISTRATOR|Temporary failure in name resolution|ERR_NAME_NOT_RESOLVED|ERR_INTERNET_DISCONNECTED|Could not load MathJax' artifacts/browser-e2e.log; then
+            verdict=BLOCKED
+          elif [[ "$BROWSER_RESULT" == "skipped" || "$BROWSER_RESULT" == "" ]]; then
+            verdict=NOT_VERIFIED
+          else
+            verdict=FAIL
+          fi
+          {
+            echo "## B2.2 strict browser result: $verdict"
+            echo ""
+            echo "| Check | GitHub Actions outcome |"
+            echo "|---|---|"
+            echo "| Typecheck/build/16 Node tests | $NODE_RESULT |"
+            echo "| Six real HTTP asset GET requests | $HTTP_RESULT |"
+            echo "| Real Chromium ESM + MathJax CDN 3.2.2 | $BROWSER_RESULT |"
+            echo ""
+            echo "A BLOCKED/FAIL/NOT_VERIFIED classification is not a PASS; the browser step remains failing when assertions fail."
+            echo "There is no MathJax 3.2.1 fallback in this workflow."
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "$verdict" > artifacts/verdict.txt
+          echo "VERDICT=$verdict" | tee artifacts/result.log
+
+      - name: Upload test logs, browser trace and screenshot
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: b22-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/
+          if-no-files-found: warn
+          retention-days: 14

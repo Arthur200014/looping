@@ -6,6 +6,9 @@ Unlike browser_station_smoke.py, this test never rewrites modules or injects Mat
 from __future__ import annotations
 
 import argparse
+import json
+import os
+from pathlib import Path
 import sys
 from concurrent.futures import ThreadPoolExecutor
 from urllib.error import URLError
@@ -38,11 +41,17 @@ def verify_http_files(url: str) -> None:
 
 def run_browser(url: str) -> None:
     with sync_playwright() as pw:
-        browser = pw.chromium.launch(executable_path='/usr/bin/chromium', args=['--no-sandbox'])
+        browser_binary = None if os.environ.get('B2_USE_PLAYWRIGHT_CHROMIUM') == '1' else os.environ.get('CHROMIUM_EXECUTABLE', '/usr/bin/chromium')
+        browser = pw.chromium.launch(executable_path=browser_binary, args=['--no-sandbox'])
         page = browser.new_page(viewport={'width': 1280, 'height': 800})
+        artifact_dir = Path(os.environ.get('B2_ARTIFACT_DIR', 'artifacts/browser'))
+        artifact_dir.mkdir(parents=True, exist_ok=True)
+        page.context.tracing.start(screenshots=True, snapshots=True, sources=True)
         errors: list[str] = []
         console_errors: list[str] = []
         responses: list[tuple[str, int]] = []
+        request_failures: list[str] = []
+        page.on('requestfailed', lambda request: request_failures.append(f'{request.url}: {request.failure}'))
         page.on('pageerror', lambda error: errors.append(str(error)))
         page.on('console', lambda message: console_errors.append(message.text) if message.type == 'error' else None)
         page.on('response', lambda response: responses.append((response.url, response.status)))
@@ -60,6 +69,7 @@ def run_browser(url: str) -> None:
             bottom = page.locator('#student mjx-mfrac mjx-den').first.bounding_box()
             assert top is not None and bottom is not None and top['y'] < bottom['y'], 'MathJax fraction is not vertically stacked'
             assert page.evaluate("typeof window.MathJax?.typesetPromise") == 'function'
+            assert page.evaluate('window.MathJax.version') == '3.2.2', 'Loaded MathJax version is not exactly 3.2.2'
             assert any('cdn.jsdelivr.net/npm/mathjax@3.2.2/' in address and status == 200 for address, status in responses), 'MathJax 3.2.2 was not fetched from CDN'
             print('PASS MathJax: real CDN request, typesetPromise, vertically stacked fraction', flush=True)
 
@@ -93,7 +103,26 @@ def run_browser(url: str) -> None:
         except (BrowserError, BrowserTimeout) as exc:
             raise RuntimeError(f'Browser HTTP / MathJax check BLOCKED/FAIL: {exc}') from exc
         finally:
-            print(f'Browser pageerrors: {errors}; console errors: {console_errors}', flush=True)
+            # Evidence is captured on both success and failure. A blank/blocked page is NOT a successful test.
+            try:
+                page.screenshot(path=str(artifact_dir / 'page.png'), full_page=True, timeout=5000)
+            except Exception as exc:
+                print(f'Screenshot unavailable: {exc}', flush=True)
+            try:
+                page.context.tracing.stop(path=str(artifact_dir / 'trace.zip'))
+            except Exception as exc:
+                print(f'Browser trace unavailable: {exc}', flush=True)
+            try:
+                mathjax_version = page.evaluate('window.MathJax?.version ?? null') if not page.is_closed() else None
+            except BrowserError:
+                mathjax_version = None
+            (artifact_dir / 'browser-events.json').write_text(json.dumps({
+                'pageerrors': errors, 'console_errors': console_errors,
+                'request_failures': request_failures,
+                'responses': responses,
+                'mathjax_version': mathjax_version,
+            }, indent=2), encoding='utf-8')
+            print(f'Browser pageerrors: {errors}; console errors: {console_errors}; request failures: {request_failures}', flush=True)
             browser.close()
 
 
