@@ -104,3 +104,37 @@ Actual MathJax CDN fetch/typeset of LaTeX (the DOM smoke uses injected mock engi
 **Important interpretation**: The HTTP fixture/server is implemented and served successfully to a Python HTTP client. **Chromium HTTP ESM imports and MathJax CDN 3.2.2 remain NOT_VERIFIED**, because `page.goto` was blocked before any script ran and the DNS environment cannot fetch the CDN. `pageerror: []`, `console errors: []` in the failing test signify **no page executed**, not confirmation of a clean running page. Browser fixture focus/cleanup and 375px layout also NOT_VERIFIED in real HTTP flow; only prior B2.1 test covers them using different loading conditions. No true two-independent-browser network sync is claimed.
 
 **Next**: re-run full `python tests/browser_http_mathjax.py` where browser localhost navigation and CDN DNS are permitted. Keep B2.2 blocked until an actual success.
+
+
+## B2.2 repeat / user-requested command — 2026-10-22 10:04–10:05 UTC
+
+**Target:** `Arthur200014/looping` main at `861ec4a2f6b6549a0742989160b39b8478792895` before this documentation-only commit; local checkout reconstruction at `/mnt/data/looping-b22`. Local source assets checked against current GitHub blob SHAs: `tests/browser_http_mathjax.py`, `tests/fixtures/station-http.mjs`, `tests/fixtures/station-http.html`, `tests/serve_fixture.py`, `tests/station-contract.test.mjs`, `shared/math/MathJaxRenderer.ts` **6/6 exact SHA matches**.
+
+**Environment:** Node v22.16.0, npm 10.9.2, TypeScript v5.8.3, Python Playwright + `/usr/bin/chromium`.
+
+### Exact command and output
+```bash
+cd /mnt/data/looping-b22
+npm test && python tests/browser_http_mathjax.py
+# tsc --noEmit: PASS
+# tsc: PASS
+# TAP: tests 16, pass 16, fail 0, skipped 0, cancelled 0
+# TAP duration_ms 96.608955
+# Fixture http://127.0.0.1:37297/tests/fixtures/station-http.html
+# PASS HTTP GET: 6 static assets, 200, correct MIME, nonempty
+# NOT_VERIFIED: Browser HTTP / MathJax check BLOCKED/FAIL:
+# Page.goto: net::ERR_BLOCKED_BY_ADMINISTRATOR
+# at http://127.0.0.1:37297/tests/fixtures/station-http.html
+# combined exit code: 2
+```
+
+**Separate checks:**
+- `python tests/browser_http_mathjax.py --assets-only`: **exit 0**, HTTP GET 6/6 all 200 with correct MIME at dynamic port 36139.
+- `python -m py_compile tests/serve_fixture.py tests/browser_http_mathjax.py tests/browser_mathjax_offline.py`: **exit 0**.
+- `socket.getaddrinfo('cdn.jsdelivr.net',443)`: **gaierror [Errno -3] Temporary failure in name resolution**. `github.com` similarly cannot be resolved from this container. No CDN fetch was successful.
+- Browser pageerror `[]`, console errors `[]` were printed by test teardown **after blocked navigation**; browser scripts had not run. Do **not** infer a clean console from these empty lists.
+- No alternate permitted browser service was available for a full browser test. Restrictions were not bypassed.
+
+**B2.2 STATUS: BLOCKED (NOT_VERIFIED)** for real browser HTTP ES module evaluation, MathJax **3.2.2** `typesetPromise` and vertical `mjx-mfrac`, navigation 0, focus, cleanup, runtime console and 375px layout within the HTTP-loaded fixture. Prior local MathJax **3.2.1** smoke was not used as evidence for 3.2.2 and was not re-run in this turn. All `OGA/1–25`, `testing-hosting`, and production sources unchanged.
+
+**One next action:** rerun the full command on a permitted Chromium+localhost HTTP+CDN network environment and capture real on-page assertions, keeping B2.2 blocked until then.

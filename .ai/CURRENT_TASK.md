@@ -1,7 +1,7 @@
 # CURRENT TASK
 
 **Stage**: B2.2 — verification of real HTTP ESM + MathJax 3.2.2 in a browser.
-**Status**: PARTIAL / BLOCKED_BY_ENVIRONMENT (fixture and HTTP server DONE, browser+CDN E2E NOT_VERIFIED).  
+**Status**: BLOCKED_BY_ENVIRONMENT (HTTP fixture implemented; B2.2 browser+MathJax 3.2.2 E2E NOT_VERIFIED after a second real attempt).  
 **Updated**: 2026-10-22.
 
 ## Delivered
@@ -17,3 +17,15 @@ Chromium `page.goto(http://127.0.0.1:<port>/tests/fixtures/station-http.html)` -
 
 ## Guardrails
 Do not re-audit A, change `testing-hosting`, access production infrastructure, or create `OGA/1–25` content. Read `.ai/HANDOFF.md` and this task first.
+
+## New verification checkpoint — 2026-10-22 10:04 UTC
+- Re-ran **exact command** `npm test && python tests/browser_http_mathjax.py` from `/mnt/data/looping-b22`.
+- PASS: typecheck/build/Node `16/16`; 6 HTTP resources served 200 with correct content types.
+- BLOCKED (combined exit 2): Chromium `Page.goto: net::ERR_BLOCKED_BY_ADMINISTRATOR at http://127.0.0.1:37297/tests/fixtures/station-http.html`.
+- `python tests/browser_http_mathjax.py --assets-only`: PASS exit 0, six HTTP GETs (port 36139).
+- CDN DNS: `socket.getaddrinfo('cdn.jsdelivr.net',443)` -> `gaierror: [Errno -3] Temporary failure in name resolution`.
+- Browser's actual HTTP ESM execution, MathJax **3.2.2** `typesetPromise/mjx-mfrac`, navigation/focus/cleanup/console/375px: **NOT_VERIFIED**. Empty pageerror/console lists arise before page load, not evidence of success.
+- No alternate permitted browser tool available. No code, fixture, production, `testing-hosting` or `OGA/1–25` changes.
+- Exact evidence: `.ai/TEST_RESULTS.md` (B2.2 repeated run).
+
+**NEXT_ACTION (one):** Run `npm test && python tests/browser_http_mathjax.py` in a browser runtime that permits localhost HTTP and CDN DNS/HTTPS; close B2.2 only after a genuine full PASS.

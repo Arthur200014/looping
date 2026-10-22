@@ -53,6 +53,9 @@
 | Slice | Status | Actual evidence |
 |---|---|---|
 | B2.1 — common station shell, controlled fields, MathJax adapter, mount/cleanup | DONE | Local npm test 16/16; Chromium DOM smoke PASS; 8 new files byte-matched Git staged blobs |
-| B2.2 — actual served ESM + MathJax rendering verification | PARTIAL / BLOCKED | Fixture + 6 HTTP GET PASS; Chromium page.goto blocked ERR_BLOCKED_BY_ADMINISTRATOR; MathJax 3.2.2 CDN DNS fail, NOT_VERIFIED |
+| B2.2 — actual served ESM + MathJax rendering verification | BLOCKED (retested 2026-10-22) | npm test 16/16 PASS, 6 HTTP assets 200; Chromium goto ERR_BLOCKED_BY_ADMINISTRATOR (exit 2), jsDelivr DNS gaierror -3. ESM/MathJax 3.2.2/browser UX NOT_VERIFIED |
 
 Task kits OGA/1–25 remain NOT_STARTED, no bulk content generated.
+
+
+B2.2 repeated run: 2026-10-22 10:04 UTC; **no transition to DONE**. Next: repeat full HTTP-browser CDN test in a legitimately permitted environment. No OGA tasks promoted.
