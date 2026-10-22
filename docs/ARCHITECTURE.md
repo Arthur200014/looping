@@ -62,3 +62,9 @@ teacher action
 
 ## Этап B — критерии выбора сборки
 Подтвердить deploy target, Vite/TypeScript/Playwright как предложенный минимальный стек. Stable deep links `OGA/13/gaid.html` должны открываться на выбранном хостинге. Не вводить тяжёлый UI framework без измеримой потребности.
+
+
+## Реализованный этап B1 (2026-10-22)
+Контракт, события, порядок применения, ограничения и команды тестирования описаны в [B1_SYNC_CONTRACT.md](B1_SYNC_CONTRACT.md). Реализованы `shared/core/RoomState.ts`, `shared/core/reducer.ts`, `shared/core/NavigationController.ts`, `shared/sync/InMemoryTransport.ts`.
+
+B1 применяется в интеграционных Node-тестах, но **не** подключён к HTML-гайдам и не является сетевым транспортом. Следующие слои (UI, математический renderer, общая доска, защищённый сервер) пока не реализованы; соответствующие проверки NOT_VERIFIED.

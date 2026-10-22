@@ -1,5 +1,11 @@
-# Shared kernel (Stage B)
+# Shared kernel
 
-Здесь появится единый код UI, механик, состояния, доски, транспорта и валидаторов. Сейчас реализации нет — `NOT_STARTED`.
+B1 implemented and tested (in-process; no UI or network):
+- `core/RoomState.ts` — versioned room state and explicit trusted roster.
+- `core/reducer.ts` — deterministic, permission-checked state transitions and replay.
+- `core/NavigationController.ts` — navigation (including chapter 0), answer/choice and reset API, lifecycle with unsubscribe.
+- `sync/InMemoryTransport.ts` — authoritative one-process hub and isolated transport/client instances.
 
-Предполагаемая последовательность: `core/RoomState` → reducer + in-memory transport → lifecycle → widgets/math → board → защищённый сетевой адаптер. Контракт и инварианты — `docs/ARCHITECTURE.md` и `.ai/PROJECT_SPEC.md`.
+Source of truth: [../docs/B1_SYNC_CONTRACT.md](../docs/B1_SYNC_CONTRACT.md). Future browser/SignalR transport is NOT_VERIFIED; `InMemoryRoomHub` is not authentication.
+
+Tests: `npm test` from repository root. Do not copy shared code into individual OGA HTML pages.

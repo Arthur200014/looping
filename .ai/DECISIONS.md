@@ -25,3 +25,9 @@
 
 ## ADR-008. Источники и правообладание
 **Принято**: собственная стилизованная графика, нейтральные мультяшные мотивы без чужих официальных кадров/логотипов; алгоритмы проверяются независимо от источника сюжета. ФИПИ — не заявлять авторство/номер прототипа без сверки.
+
+
+## ADR-009. B1 strict TS + CAS reducer + in-process transport
+**Принято 2026-10-22:** код B1 — strict TypeScript (ESM, NodeNext), `RoomState` с сохраняемой `initialNavigation`, `attempt`, `revision` и `appliedEventIds`. Reducer принимает событие только при `expectedRevision === revision`, проверяет ID, session, role и payload. Duplicate ID — no-op; события сохраняются только после успешного commit. `session.reset` начинает новое прохождение без разрыва комнаты, все answers/choices удаляются.
+
+Транспорт `InMemoryRoomHub` авторитетен только внутри одного JS процесса, не даёт production authorization и не пересылает данные через сеть. Future SignalR backend обязан проверять authenticated actorId на сервере, хранить event IDs вместе со snapshots и решать рост ledger. Наличие серверной аутентификации, networked e2e и UI **NOT_VERIFIED**.

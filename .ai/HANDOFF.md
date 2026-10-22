@@ -1,22 +1,23 @@
-# HANDOFF — вход для нового чата или итерации агента
+# HANDOFF — B1 complete / next B2
 
-**Состояние на 2026-10-22**: первая порция Stage A. `looping` был пустым; начат проект и подготовлены документы/25 каталожных заглушек. Legacy `testing-hosting` не изменять.
+Дата: 2026-10-22. **Независимо подтверждай свежий SHA ветки main через GitHub при продолжении.**
 
-## Что подтверждено
-- GitHub connector: обе репы доступны, `looping` позволяет push; default branch `main`.
-- Исходные каталоги `OGA/6,8,9,13,17,18` инвентаризированы через GitHub; в малых файлах найдены Firebase RTDB, логика комнат/presence, общие доски, GAS, MathJax/KaTeX. Подробно: `docs/SOURCE_AUDIT.md`.
-- Большие `gaid.html` (3.7–13.3 MB) не прочитаны: GitHub connector вернул пустое содержимое. Это оставлено NOT_VERIFIED, а не «изучено полностью».
-- Метаданные и подход зафиксированы в `.ai/PROJECT_SPEC.md`, `.ai/DECISIONS.md`.
+## Completed B1
+- `shared/core/RoomState.ts` — строгие типы и конфигурация комнаты (глава 0).
+- `shared/core/reducer.ts` — события join/leave, navigation.go, activity.answer.set, activity.choice.set, session.reset; роль teacher, CAS revision, dedup/replay.
+- `shared/sync/InMemoryTransport.ts` — один in-process hub + независимые клиентские handles, snapshot/subscribe/cleanup/reconnect/history.
+- `shared/core/NavigationController.ts` — один transport subscription, управление станциями, полями и ответами, reset.
+- `tests/room-core.test.mjs` — 13/13 тестов PASS при `npm test`. Git blob SHA восьми файлов исходников/тестов совпали с проверенной локальной рабочей копией.
+- Документ контракта: `docs/B1_SYNC_CONTRACT.md`; evidence `.ai/TEST_RESULTS.md`; backlog `.ai/TASK_BOARD.md`.
 
-## Текущий фокус
-**B1**: RoomState, event reducer, in-memory transport + тесты навигации (глава 0, reset, duplicate/reconnect) и корректного cleanup. Конкретный пошаговый scope: `.ai/CURRENT_TASK.md`.
+## Scope / NOT_VERIFIED
+Browser E2E, real independent-browser clients, remote transport, мобильная верстка, MathJax, реальные задачи и математика не проверялись. Сетевой backend/production Firebase/БД не подключались. Offline `npm install --package-lock-only` failed ENOTCACHED; локальные тесты использовали TypeScript 5.8.3 уже установленный в среде.
 
-## Запреты
-Никаких изменений `testing-hosting`, prod Firebase/БД, чужих credentials, заявлений о проверенной двухбраузерной синхронизации. Не генерировать 25 непроверенных наборов до эталона №13 и acceptance.
+## Next task
+B2.1 — **одна** тонкая shared shell станции c MathJax renderer, bind NavigationController, tests + cleanup. Подробно в `.ai/CURRENT_TASK.md`. До B3/B4 и проверенного эталона №13 нельзя создавать 25 комплектов.
 
-## Старт продолжения
-1. Читать `.ai/HANDOFF.md` → `.ai/CURRENT_TASK.md`.
-2. Проверить HEAD `main` и минимально нужные `shared/, docs/ARCHITECTURE.md, tests/`.
-3. Сделать B1 с тестами, записать результаты, коммитить лишь завершённую проверенную порцию и обновить HANDOFF.
-
-**Git**: текущий SHA всегда брать из `refs/heads/main`, а не из этого файла; последнюю запись подтвердить отдельным чтением ref.
+## Continuation routine
+1. Прочесть `.ai/HANDOFF.md` и `.ai/CURRENT_TASK.md`.
+2. Проверить `main`; читать только файлы текущей задачи и `docs/B1_SYNC_CONTRACT.md`.
+3. После реального запуска проверок обновить `.ai/TEST_RESULTS.md`, board и handoff; commit в `looping` без force.
+4. `Arthur200014/testing-hosting` строго READ-ONLY; никаких рабочих config/секретов.

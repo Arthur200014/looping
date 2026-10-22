@@ -38,7 +38,7 @@
 | Этап | Состояние | Замечание |
 |---|---|---|
 | A — метаданные/доступ/структура | DONE | Созданы проектные каталоги и документы; полный аудит гигантских `gaid.html` в backlog |
-| B1 — RoomState / reducer / in-memory navigation | NOT_STARTED | Следующий шаг |
+| B1 — RoomState / reducer / in-memory navigation | DONE | 13/13 Node in-process tests PASS, 100 switches with stable subscriber count; network/browser NOT_VERIFIED |
 | B2 — единый UI/MathJax/проверка вводов | NOT_STARTED | Только после B1 |
 | B3 — общая векторная доска | NOT_STARTED | Компактная панель + Ctrl+Z + стирание штрихов |
 | B4 — test-only realtime server + auth | NOT_STARTED | Реальные независимые браузеры |
