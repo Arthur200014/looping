@@ -1,0 +1,19 @@
+.oge-shell{box-sizing:border-box;max-width:960px;margin:0 auto;padding:16px;color:#172434;background:#f6f8fc;font-family:system-ui,-apple-system,sans-serif;border-radius:16px}
+.oge-shell *{box-sizing:border-box}
+.oge-status{font-size:13px;color:#43556c;margin:0 0 12px}
+.oge-nav{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.oge-nav button{min-height:40px;padding:8px 12px;border-radius:10px;border:1px solid #9faec5;background:#fff;color:#142d4f;font:inherit;cursor:pointer}
+.oge-nav button[aria-current=step]{background:#1f477c;color:#fff}
+.oge-nav button:disabled{opacity:.6;cursor:default}
+.oge-nav button:focus-visible,.oge-station input:focus-visible{outline:3px solid #d48719;outline-offset:2px}
+.oge-station{background:#fff;border:1px solid #d9e1ec;border-radius:14px;padding:20px}
+.oge-station h2{font-size:clamp(20px,3vw,29px);line-height:1.2;margin:0 0 16px}
+.oge-formula{overflow-x:auto;font-size:clamp(19px,3vw,25px);padding:16px 0;min-height:64px}
+.oge-field{display:grid;gap:7px;font-weight:600;max-width:420px}
+.oge-field input{min-width:0;width:100%;padding:12px;border:1px solid #778ba8;border-radius:10px;font:inherit;font-weight:400}
+.oge-choices{border:0;margin:16px 0 0;padding:0;display:grid;gap:8px}
+.oge-choices legend{font-weight:600;margin-bottom:8px}
+.oge-choices label{display:flex;align-items:center;gap:10px;min-height:40px}
+.oge-choices input{width:18px;height:18px}
+@media(max-width:520px){.oge-shell{padding:10px;border-radius:0}.oge-station{padding:14px}.oge-nav button{flex:1 1 auto}}
+@media(prefers-reduced-motion:reduce){.oge-shell *{scroll-behavior:auto}}

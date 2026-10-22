@@ -1,23 +1,22 @@
-# HANDOFF — B1 complete / next B2
+# HANDOFF — B2.1 completed; continue B2.2
 
-Дата: 2026-10-22. **Независимо подтверждай свежий SHA ветки main через GitHub при продолжении.**
+Date: 2026-10-22. This file and .ai/CURRENT_TASK.md are the entrypoints for next turn. Verify latest main SHA directly; do not trust historical SHA in handoff.
 
-## Completed B1
-- `shared/core/RoomState.ts` — строгие типы и конфигурация комнаты (глава 0).
-- `shared/core/reducer.ts` — события join/leave, navigation.go, activity.answer.set, activity.choice.set, session.reset; роль teacher, CAS revision, dedup/replay.
-- `shared/sync/InMemoryTransport.ts` — один in-process hub + независимые клиентские handles, snapshot/subscribe/cleanup/reconnect/history.
-- `shared/core/NavigationController.ts` — один transport subscription, управление станциями, полями и ответами, reset.
-- `tests/room-core.test.mjs` — 13/13 тестов PASS при `npm test`. Git blob SHA восьми файлов исходников/тестов совпали с проверенной локальной рабочей копией.
-- Документ контракта: `docs/B1_SYNC_CONTRACT.md`; evidence `.ai/TEST_RESULTS.md`; backlog `.ai/TASK_BOARD.md`.
+## Completed and committed slice
+B1 reusable RoomState, reducer, NavigationController, InMemoryTransport remain unchanged. B2.1 introduces:
+- shared/ui/StationShell.ts and shared/ui/station-shell.css — common station shell using B1 controller; teacher navigation including chapter 0, per-student controlled inputs/choices, presence, reset, accessible labels, keyboard-native controls.
+- shared/math/MathJaxRenderer.ts — injectable MathRenderer + loadMathJax() pinned to MathJax 3.2.2 CDN.
+- tests/fixtures/stations.mjs, station-smoke.mjs/html — only synthetic test material, NOT an OGA task.
+- tests/station-contract.test.mjs, tests/browser_station_smoke.py — Node contract and Chromium DOM smoke.
 
-## Scope / NOT_VERIFIED
-Browser E2E, real independent-browser clients, remote transport, мобильная верстка, MathJax, реальные задачи и математика не проверялись. Сетевой backend/production Firebase/БД не подключались. Offline `npm install --package-lock-only` failed ENOTCACHED; локальные тесты использовали TypeScript 5.8.3 уже установленный в среде.
+## Evidence
+Local checkout reconstruction, Node 22.16.0 / TypeScript 5.8.3: `npm test` PASS **16/16** (the original 13 B1 cases plus 3 new cases). Python Playwright against headless `/usr/bin/chromium`: PASS for chapter 0↔1, focus-preserving input, choices, 100 switches without subscription growth, reset, remount/dispose, 375px no horizontal overflow. All 8 newly staged code/test asset Git blob hashes matched tested local bytes. Details: .ai/TEST_RESULTS.md and docs/B2_1_SHELL.md.
 
-## Next task
-B2.1 — **одна** тонкая shared shell станции c MathJax renderer, bind NavigationController, tests + cleanup. Подробно в `.ai/CURRENT_TASK.md`. До B3/B4 и проверенного эталона №13 нельзя создавать 25 комплектов.
+## Honest limitations
+Chromium runner blocked local HTTP/file URL navigation. Browser smoke therefore combined already-compiled JS modules into one evaluation scope in an about:blank page: DOM behavior validated, **real HTTP ESM module loading NOT_VERIFIED**. Fixture uses a fake MathJax engine: **actual CDN load/real TeX visual rendering NOT_VERIFIED**. Two participants were rendered in one browser process and share one in-memory hub; **two independent browsers / network sync NOT_VERIFIED**. Phone viewport is simulated desktop Chromium, not physical mobile. No OGA content or backend/security integration.
 
-## Continuation routine
-1. Прочесть `.ai/HANDOFF.md` и `.ai/CURRENT_TASK.md`.
-2. Проверить `main`; читать только файлы текущей задачи и `docs/B1_SYNC_CONTRACT.md`.
-3. После реального запуска проверок обновить `.ai/TEST_RESULTS.md`, board и handoff; commit в `looping` без force.
-4. `Arthur200014/testing-hosting` строго READ-ONLY; никаких рабочих config/секретов.
+## NEXT_ACTION
+B2.2: verify real HTTP-served ES module page loading and real MathJax typesetting in an unrestricted browser environment, then record evidence before promoting B2 UI readiness.
+
+## Boundaries
+Only work in Arthur200014/looping; Arthur200014/testing-hosting is READ-ONLY. No OGA/1–25 material and no production Firebase/GAS/DB credentials. Start by reading .ai/HANDOFF.md + .ai/CURRENT_TASK.md; inspect only files relevant to next task.

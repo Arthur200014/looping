@@ -68,3 +68,18 @@
 **Environment limitation:** `npm install --package-lock-only --offline --ignore-scripts --no-audit --no-fund` = FAIL `ENOTCACHED` (TypeScript absent from npm cache; network blocked). Lockfile не создан; локально `npm test` использовал присутствующий tsc 5.8.3. Для внешнего воспроизведения требуется доступный npm registry и `npm install`.
 
 **NOT_VERIFIED:** запуск в браузере; два независимых браузера/процесса с реальным транспортом; адаптивность телефона; учебный контент и математика; задержки реальной сети и восстановление после перезапуска сервера. B1 in-memory тесты **не равны** сетевому E2E. Нет проверки прав на внешнем backend: hub предназначен только для доверенного test runtime.
+
+
+## B2.1 — station shell and MathJax adapter (2026-10-22)
+
+**Source:** `shared/ui/StationShell.ts`, `shared/ui/station-shell.css`, `shared/math/MathJaxRenderer.ts`. Synthetic fixture only in `tests/fixtures/`. B1 modules untouched.  
+**Environment:** local `/mnt/data/looping-b21`; Node v22.16.0, npm 10.9.2, TypeScript 5.8.3; Python Playwright + /usr/bin/chromium. Local repo files mirrored from GitHub; 8 added source/test assets matched their staged Git blob SHA byte-for-byte.
+
+### Executed commands / results
+- `cd /mnt/data/looping-b21 && npm test` (runs `npm run typecheck && npm run build && node --test tests/*.test.mjs`): **PASS**; TAP `tests 16, pass 16, fail 0, skipped 0, cancelled 0`. This includes all 13 B1 regression test cases and 3 B2.1 contract cases.
+- `cd /mnt/data/looping-b21 && python tests/browser_station_smoke.py`: **PASS** using headless Chromium. Asserted teacher 0→1→0 navigation reflected in student's DOM; student navigation disabled; per-person answers and choices; stable focus and cursor while typing; MathRenderer stub invoked; reset cleared input; 100 switches left 2 active hub subscriptions; after unmount 0; remount reconnected; no JS page errors; at 375px viewport no horizontal overflow.
+- Local `python -m http.server 8765` + Chromium `page.goto(http://127.0.0.1:8765/...)`: **BLOCKED**, `net::ERR_BLOCKED_BY_ADMINISTRATOR`. `file://` navigation also BLOCKED. Instead, the smoke tool exercised the real compiled source JS (same file bytes), combining ESM code in one evaluation scope in a blank Chromium page. This does NOT prove normal network/ESM loading.
+- Git staging verification: GitHub recursive tree files `shared/math/MathJaxRenderer.ts`, `shared/ui/StationShell.ts`, CSS, 3 fixture files, Node test and Python smoke test have matching local git blob SHA (8/8).
+
+### NOT_VERIFIED and constraints
+Actual MathJax CDN fetch/typeset of LaTeX (the DOM smoke uses injected mock engine); running an HTTP-served browser ESM page; two independent browser contexts or machines with network realtime; physical mobile touch and viewport; OGA mathematics and content; backend authentication/persistence. Browser UI smoke uses two DOM participants in one browser with one in-memory hub, not independent network sessions. MathJax 3.2.2 is configured/pinned, its production CDN availability is not asserted.

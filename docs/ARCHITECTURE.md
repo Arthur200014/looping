@@ -68,3 +68,6 @@ teacher action
 Контракт, события, порядок применения, ограничения и команды тестирования описаны в [B1_SYNC_CONTRACT.md](B1_SYNC_CONTRACT.md). Реализованы `shared/core/RoomState.ts`, `shared/core/reducer.ts`, `shared/core/NavigationController.ts`, `shared/sync/InMemoryTransport.ts`.
 
 B1 применяется в интеграционных Node-тестах, но **не** подключён к HTML-гайдам и не является сетевым транспортом. Следующие слои (UI, математический renderer, общая доска, защищённый сервер) пока не реализованы; соответствующие проверки NOT_VERIFIED.
+
+## B2.1 common station shell
+`shared/ui/StationShell.ts` binds station data to `NavigationController` and per-actor answers/choices; `mount` owns connect/subscribe and `unmount` owns unsubscribe/AbortController/disconnect. It preserves the answer input DOM for accepted state updates to retain focus. `shared/math/MathJaxRenderer.ts` keeps MathJax loading isolated and injectable. CSS is shared; fixture content stays in tests/fixtures. For guarantees and limitations see [B2_1_SHELL.md](B2_1_SHELL.md). No back-end authentication or independent-browser network transport is claimed.

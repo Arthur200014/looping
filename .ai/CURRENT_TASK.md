@@ -1,22 +1,23 @@
 # CURRENT TASK
 
-**Stage:** B2 — тонкая общая оболочка UI и математического рендеринга.  
-**Status:** NOT_STARTED; B1 = DONE (typecheck + 13 in-process tests PASS).  
-**Date:** 2026-10-22.
+Stage: **B2.2 — Browser integration verification for common station shell**  
+Status: **NOT_STARTED** (B2.1 = DONE; B1 = DONE).  
+Updated: 2026-10-22.
 
-## Закрытый срез B1
-Реализованы RoomState, типизированные события, pure reducer + replay, InMemoryRoomHub/Transport, NavigationController (0→1→0), per-user answers/choices, join/leave, teacher reset, deduplication и revision CAS. Проверки в `.ai/TEST_RESULTS.md`; ограничения и контракт — `docs/B1_SYNC_CONTRACT.md`.
+## Completed B2.1
+- Reusable StationShell mounted to existing NavigationController, with one transport subscription per client; no new transport, no changes to B1 reducer.
+- Data-defined stations, controlled answer and choice per actor, teacher chapter 0/1 navigation, reset, status, accessible/native inputs, local lifecycle cleanup.
+- Isolated MathJax 3.2.2 adapter/loader with injectable MathRenderer; math formula inserted as textContent rather than unsafe HTML.
+- Typecheck+build+Node tests 16/16 PASS; Chromium DOM smoke PASS including 375px overflow check, under stated limitations.
+- Documentation: docs/B2_1_SHELL.md; commands/results .ai/TEST_RESULTS.md.
 
-## Следующая ограниченная задача B2.1
-1. Сначала прочитать `.ai/HANDOFF.md`, этот файл и `docs/B1_SYNC_CONTRACT.md`.
-2. Проверить HEAD `main` без повторного аудита testing-hosting.
-3. Создать единую не зависящую от предметного контента оболочку станции, подключённую к текущему `NavigationController` и интерфейсу `RoomTransport`, с lifecycle cleanup.
-4. Добавить доступный базовый input, MathJax adapter и минимальные статические тестовые примеры **в tests/fixtures**, не в OGA/13 и не в новые учебные HTML.
-5. Тестировать события UI и снятие подписок; проверить браузерную доступность, если есть реальный browser runner. Не выдавать in-memory тест за двухбраузерный.
-6. Обновить четыре обязательных файла .ai и сделать отдельный проверенный commit.
+## One next bounded action
+**B2.2:** make and verify a truly served static ES module test page using fixture data (NOT educational OGA content) with actual MathJax 3.2.2 loaded, inspect browser console and formula rendering. If external CDN unavailable, explicitly record failure and provide a supported development fallback, not an invented PASS.
 
-**Acceptance B2.1:** реальный reuse shared shell + MathJax, корректный controlled input и navigation 0, отсутствие дублированных listeners; документированные точные команды/результаты.
+### Acceptance
+- Real Chromium/web browser opens fixture through standard HTTP module import; actual MathJax `typesetPromise` renders `\\frac` vertically and cleanup works.
+- Retest navigation 0 and input focus without rewriting shared state.
+- Evidence includes exact commands, page/viewport, console errors, and an honest environmental result.
+- No changes to testing-hosting, production environment, or OGA/1–25.
 
-**NEXT_ACTION:** реализовать маленькую shared оболочку станции с подключением к NavigationController, без комплекта ОГЭ.
-
-**Safety:** никаких изменений testing-hosting, production DB, old Firebase keys, секретов, массовой генерации комплектов. Этап C №13 разрешён лишь после завершения B.
+Full shell contract: docs/B2_1_SHELL.md. Next steps after B2.2: B3 common vector board; B4 isolated authenticated realtime backend and independent-browser tests.
