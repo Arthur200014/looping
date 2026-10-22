@@ -1,23 +1,19 @@
 # CURRENT TASK
 
-Stage: **B2.2 — Browser integration verification for common station shell**  
-Status: **NOT_STARTED** (B2.1 = DONE; B1 = DONE).  
-Updated: 2026-10-22.
+**Stage**: B2.2 — verification of real HTTP ESM + MathJax 3.2.2 in a browser.
+**Status**: PARTIAL / BLOCKED_BY_ENVIRONMENT (fixture and HTTP server DONE, browser+CDN E2E NOT_VERIFIED).  
+**Updated**: 2026-10-22.
 
-## Completed B2.1
-- Reusable StationShell mounted to existing NavigationController, with one transport subscription per client; no new transport, no changes to B1 reducer.
-- Data-defined stations, controlled answer and choice per actor, teacher chapter 0/1 navigation, reset, status, accessible/native inputs, local lifecycle cleanup.
-- Isolated MathJax 3.2.2 adapter/loader with injectable MathRenderer; math formula inserted as textContent rather than unsafe HTML.
-- Typecheck+build+Node tests 16/16 PASS; Chromium DOM smoke PASS including 375px overflow check, under stated limitations.
-- Documentation: docs/B2_1_SHELL.md; commands/results .ai/TEST_RESULTS.md.
+## Delivered
+- Browser entrypoint: `tests/fixtures/station-http.html` and `station-http.mjs`. Imports compiled ESM and the real `loadMathJax(document)` (pinned CDN version 3.2.2); no fake math renderer.
+- `tests/serve_fixture.py` and `tests/browser_http_mathjax.py` with real asset-response assertions and fail-closed browser assertions; auxiliary local `tests/browser_mathjax_offline.py`.
+- 16/16 Node tests incl B1 regressions, HTTP GET for 6 files, prior Chromium DOM smoke all PASS. Local installed MathJax 3.2.1 typesetPromise/stacked fraction PASS (NOT version 3.2.2).
 
-## One next bounded action
-**B2.2:** make and verify a truly served static ES module test page using fixture data (NOT educational OGA content) with actual MathJax 3.2.2 loaded, inspect browser console and formula rendering. If external CDN unavailable, explicitly record failure and provide a supported development fallback, not an invented PASS.
+## Blocking observations
+Chromium `page.goto(http://127.0.0.1:<port>/tests/fixtures/station-http.html)` -> `net::ERR_BLOCKED_BY_ADMINISTRATOR` (test exit 2), despite Python clients fetching same server. CDN lookup for `cdn.jsdelivr.net` -> `[Errno -3] Temporary failure in name resolution`. Thus cannot truthfully assert a successful full browser ESM import, CDN-loaded MathJax **3.2.2**, console after navigation, focus/reset/cleanup via HTTP, or mobile responsive behavior in loaded fixture. Full detailed commands and output in `.ai/TEST_RESULTS.md`.
 
-### Acceptance
-- Real Chromium/web browser opens fixture through standard HTTP module import; actual MathJax `typesetPromise` renders `\\frac` vertically and cleanup works.
-- Retest navigation 0 and input focus without rewriting shared state.
-- Evidence includes exact commands, page/viewport, console errors, and an honest environmental result.
-- No changes to testing-hosting, production environment, or OGA/1–25.
+## Single next action
+**In a browser environment with localhost HTTP navigation and public CDN DNS allowed**, run `npm test && python tests/browser_http_mathjax.py`, record the actual result and resolve any defects. Until that succeeds B2.2 remains **PARTIAL/BLOCKED**, not DONE; after it succeeds B3 is the common vector board.
 
-Full shell contract: docs/B2_1_SHELL.md. Next steps after B2.2: B3 common vector board; B4 isolated authenticated realtime backend and independent-browser tests.
+## Guardrails
+Do not re-audit A, change `testing-hosting`, access production infrastructure, or create `OGA/1–25` content. Read `.ai/HANDOFF.md` and this task first.

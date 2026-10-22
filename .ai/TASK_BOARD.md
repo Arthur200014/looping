@@ -39,7 +39,7 @@
 |---|---|---|
 | A — метаданные/доступ/структура | DONE | Созданы проектные каталоги и документы; полный аудит гигантских `gaid.html` в backlog |
 | B1 — RoomState / reducer / in-memory navigation | DONE | 13/13 Node in-process tests PASS, 100 switches with stable subscriber count; network/browser NOT_VERIFIED |
-| B2 — единый UI/MathJax/проверка вводов | IN_PROGRESS | B2.1 DOM shell PASS; MathJax CDN / actual ESM in browser NOT_VERIFIED |
+| B2 — единый UI/MathJax/проверка вводов | IN_PROGRESS | B2.1 PASS; B2.2 HTTP static delivery PASS, browser ESM / CDN 3.2.2 blocked and NOT_VERIFIED |
 | B3 — общая векторная доска | NOT_STARTED | Компактная панель + Ctrl+Z + стирание штрихов |
 | B4 — test-only realtime server + auth | NOT_STARTED | Реальные независимые браузеры |
 | C — пилот №13 | NOT_STARTED | Не начинать массовую генерацию |
@@ -53,6 +53,6 @@
 | Slice | Status | Actual evidence |
 |---|---|---|
 | B2.1 — common station shell, controlled fields, MathJax adapter, mount/cleanup | DONE | Local npm test 16/16; Chromium DOM smoke PASS; 8 new files byte-matched Git staged blobs |
-| B2.2 — actual served ESM + MathJax rendering verification | NOT_STARTED | HTTP/file navigation blocked by browser test environment; NOT_VERIFIED |
+| B2.2 — actual served ESM + MathJax rendering verification | PARTIAL / BLOCKED | Fixture + 6 HTTP GET PASS; Chromium page.goto blocked ERR_BLOCKED_BY_ADMINISTRATOR; MathJax 3.2.2 CDN DNS fail, NOT_VERIFIED |
 
 Task kits OGA/1–25 remain NOT_STARTED, no bulk content generated.

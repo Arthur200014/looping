@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>B2.2 · ESM + MathJax integration fixture</title>
+  <link rel="stylesheet" href="../../shared/ui/station-shell.css">
+  <style>
+    body { margin: 0; padding: 12px; font-family: system-ui, sans-serif; background: #e9eef5; }
+    #fixture-status { margin: 0 0 12px; padding: 8px; background: #fff; border-radius: 8px; }
+    #participants { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap: 12px; }
+  </style>
+</head>
+<body>
+  <p id="fixture-status" role="status" aria-live="polite">Загрузка настоящего MathJax 3.2.2…</p>
+  <main id="participants">
+    <div id="teacher"></div>
+    <div id="student"></div>
+  </main>
+  <script type="module" src="./station-http.mjs"></script>
+</body>
+</html>

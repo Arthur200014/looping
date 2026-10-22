@@ -1,22 +1,25 @@
-# HANDOFF — B2.1 completed; continue B2.2
+# HANDOFF — B2.2 HTTP fixture ready, external browser verification blocked
 
-Date: 2026-10-22. This file and .ai/CURRENT_TASK.md are the entrypoints for next turn. Verify latest main SHA directly; do not trust historical SHA in handoff.
+Date: 2026-10-22. Read this file then `.ai/CURRENT_TASK.md` before further work. Re-read GitHub `main` HEAD, never trust an old SHA.
 
-## Completed and committed slice
-B1 reusable RoomState, reducer, NavigationController, InMemoryTransport remain unchanged. B2.1 introduces:
-- shared/ui/StationShell.ts and shared/ui/station-shell.css — common station shell using B1 controller; teacher navigation including chapter 0, per-student controlled inputs/choices, presence, reset, accessible labels, keyboard-native controls.
-- shared/math/MathJaxRenderer.ts — injectable MathRenderer + loadMathJax() pinned to MathJax 3.2.2 CDN.
-- tests/fixtures/stations.mjs, station-smoke.mjs/html — only synthetic test material, NOT an OGA task.
-- tests/station-contract.test.mjs, tests/browser_station_smoke.py — Node contract and Chromium DOM smoke.
+## B2.2 implementation (looping only)
+- New synthetic (non-OGE) fixture `tests/fixtures/station-http.html` + `station-http.mjs`: genuine ESM imports from compiled `dist/shared` and `loadMathJax(document)` for MathJax **3.2.2**. Does NOT use mock MathJax.
+- `tests/serve_fixture.py`: ordinary local HTTP server with correct `.mjs`/`.js` MIME.
+- `tests/browser_http_mathjax.py`: real-HTTP asset check plus Playwright Chromium full ESM/CDN/vertical `mjx-mfrac`, 0↔1 navigation, focus, reset, disposal, console, 375px test. Errors return exit 2 and NOT_VERIFIED. `--assets-only` verifies actual HTTP GET/MIME independently.
+- `tests/browser_mathjax_offline.py`: auxiliary real rendering test using a *local* provided MathJax bundle; this is explicitly **NOT** a CDN/version 3.2.2 replacement.
+- B1/B2.1 production source under shared/, and all 25 OGA folders, untouched.
 
-## Evidence
-Local checkout reconstruction, Node 22.16.0 / TypeScript 5.8.3: `npm test` PASS **16/16** (the original 13 B1 cases plus 3 new cases). Python Playwright against headless `/usr/bin/chromium`: PASS for chapter 0↔1, focus-preserving input, choices, 100 switches without subscription growth, reset, remount/dispose, 375px no horizontal overflow. All 8 newly staged code/test asset Git blob hashes matched tested local bytes. Details: .ai/TEST_RESULTS.md and docs/B2_1_SHELL.md.
+## Real evidence (details in .ai/TEST_RESULTS.md)
+- `npm test`: **PASS 16/16**, strict TypeScript typecheck and build.
+- `python tests/browser_http_mathjax.py --assets-only`: **PASS**, 6 fixture/compiled/CSS URLs returned HTTP 200 with correct MIME.
+- `python tests/browser_http_mathjax.py`: **BLOCKED exit 2**, Chromium `Page.goto: net::ERR_BLOCKED_BY_ADMINISTRATOR` even though Python HTTP client works. No ESM execution or CDN render observed in browser.
+- `requests.get(https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js)`: **DNS FAIL**, `NameResolutionError` / `[Errno -3] Temporary failure in name resolution`.
+- `python tests/browser_mathjax_offline.py --bundle /opt/nvm/versions/node/v22.16.0/lib/node_modules/mathjax-full/es5/tex-mml-chtml.js --version 3.2.1`: **PASS**, true local MathJax **3.2.1** `typesetPromise` generated CHTML with numerator above denominator; no CDN request.
+- `python tests/browser_station_smoke.py`: **PASS**, B2.1 DOM smoke (mock MathJax; in-process clients).
+- Browser HTTP-import, exact MathJax 3.2.2 CDN typesetting, browser console *after page loaded*, and HTTP-based viewport/focus/cleanup remain **NOT_VERIFIED**.
 
-## Honest limitations
-Chromium runner blocked local HTTP/file URL navigation. Browser smoke therefore combined already-compiled JS modules into one evaluation scope in an about:blank page: DOM behavior validated, **real HTTP ESM module loading NOT_VERIFIED**. Fixture uses a fake MathJax engine: **actual CDN load/real TeX visual rendering NOT_VERIFIED**. Two participants were rendered in one browser process and share one in-memory hub; **two independent browsers / network sync NOT_VERIFIED**. Phone viewport is simulated desktop Chromium, not physical mobile. No OGA content or backend/security integration.
+## Next action (ONE)
+Run `python tests/browser_http_mathjax.py` after `npm test` in an environment that permits Chromium to navigate to localhost HTTP and resolve the MathJax CDN; document real PASS/FAIL and only then close B2.2. Do not report a stub/fallback as version 3.2.2 success.
 
-## NEXT_ACTION
-B2.2: verify real HTTP-served ES module page loading and real MathJax typesetting in an unrestricted browser environment, then record evidence before promoting B2 UI readiness.
-
-## Boundaries
-Only work in Arthur200014/looping; Arthur200014/testing-hosting is READ-ONLY. No OGA/1–25 material and no production Firebase/GAS/DB credentials. Start by reading .ai/HANDOFF.md + .ai/CURRENT_TASK.md; inspect only files relevant to next task.
+## Guardrails
+`Arthur200014/testing-hosting` STRICT READ-ONLY; no production access or DB, no OGA/1–25 tasks. No user data, tokens, or external service configuration committed.

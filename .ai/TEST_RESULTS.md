@@ -83,3 +83,24 @@
 
 ### NOT_VERIFIED and constraints
 Actual MathJax CDN fetch/typeset of LaTeX (the DOM smoke uses injected mock engine); running an HTTP-served browser ESM page; two independent browser contexts or machines with network realtime; physical mobile touch and viewport; OGA mathematics and content; backend authentication/persistence. Browser UI smoke uses two DOM participants in one browser with one in-memory hub, not independent network sessions. MathJax 3.2.2 is configured/pinned, its production CDN availability is not asserted.
+
+
+## B2.2 — standard HTTP fixture and real-MathJax verification attempt (2026-10-22)
+
+**Base**: GitHub `looping/main` before changes = `f37eb2dd550e1ea6e3fe84e2ad5e305357f3c1d8`. Reproducible fixture lives in `tests/fixtures/station-http.{html,mjs}`. Repository untouched: `testing-hosting` and all `OGA/1–25`.
+
+**Actual environment**: `cd /mnt/data/looping-b22`, Node v22.16.0, npm 10.9.2, TypeScript 5.8.3, Python Playwright, `/usr/bin/chromium`; port allocated dynamically on 127.0.0.1. Real HTML `<script type="module">` references actual compiled `dist/shared/*` files. Source imports are NOT flattened in this B2.2 fixture. External MathJax URL pinned `https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js`.
+
+| Command (all from `/mnt/data/looping-b22`) | Exit / outcome | Scope |
+|---|---|---|
+| `npm test` | **0 / PASS 16/16** (fail 0) | TypeScript typecheck, build, B1+B2.1 Node tests |
+| `python tests/browser_http_mathjax.py --assets-only` | **0 / PASS** | Six real localhost HTTP GET requests returned 200, correct HTML/JS/CSS MIME and nonempty bodies |
+| `python tests/browser_http_mathjax.py` | **2 / BLOCKED** | Asset GET PASS; Chromium `Page.goto: net::ERR_BLOCKED_BY_ADMINISTRATOR at http://127.0.0.1:36849/tests/fixtures/station-http.html`; navigation never completed |
+| `python tests/browser_station_smoke.py` | **0 / PASS** | Prior B2.1 Chromium DOM test (compiled JS in blank page with mock MathJax), chapter 0↔1, focus, reset, cleanup, 375px; NOT HTTP ESM |
+| `python tests/browser_mathjax_offline.py --bundle /opt/nvm/versions/node/v22.16.0/lib/node_modules/mathjax-full/es5/tex-mml-chtml.js --version 3.2.1` | **0 / PASS** | Real *local MathJax 3.2.1* `typesetPromise`, CHTML `mjx-mfrac`, numerator bounding y less than denominator bounding y, Chromium 375px; **not CDN or 3.2.2** |
+| Python `requests.get('https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js', timeout=6)` | **ConnectionError / BLOCKED** | `NameResolutionError: Failed to resolve 'cdn.jsdelivr.net' ([Errno -3] Temporary failure in name resolution)` |
+| `python -m py_compile tests/serve_fixture.py tests/browser_http_mathjax.py tests/browser_mathjax_offline.py` | **0 / PASS** | Python syntax only |
+
+**Important interpretation**: The HTTP fixture/server is implemented and served successfully to a Python HTTP client. **Chromium HTTP ESM imports and MathJax CDN 3.2.2 remain NOT_VERIFIED**, because `page.goto` was blocked before any script ran and the DNS environment cannot fetch the CDN. `pageerror: []`, `console errors: []` in the failing test signify **no page executed**, not confirmation of a clean running page. Browser fixture focus/cleanup and 375px layout also NOT_VERIFIED in real HTTP flow; only prior B2.1 test covers them using different loading conditions. No true two-independent-browser network sync is claimed.
+
+**Next**: re-run full `python tests/browser_http_mathjax.py` where browser localhost navigation and CDN DNS are permitted. Keep B2.2 blocked until an actual success.
